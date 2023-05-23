@@ -1,26 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import IntroPost from '../components/IntroPost';
-import Blogs from '../components/Blogs';
 import Footer from '../components/Footer';
-
+import GlobalApi from '../services/GlobalApi';
 
 function Home() {
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    getBooks();
+  }, []);
+
+  const getBooks = () => {
+    GlobalApi.getBook()
+      .then(response => {
+        if (response.status === 200 && response.data) {
+          const booksData = response.data.items; // Assuming the books are stored in the 'items' property
+
+          setBooks(booksData);
+          console.log(booksData);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  };
+
   return (
-	<>
-  {/* Header */}
-  <Header/>
-  {/* Search */}
-  <Search/>
-  {/* Intro Post */}
-  <IntroPost/>
-  {/* Blogs */}
-  <Blogs/>
-  {/* Footer */}
-  <Footer/>
-  </>
-  )
+    <>
+      <Header />
+      <Search />
+      {books.length > 0 ? <IntroPost books={books[0]} /> : null}
+    </>
+  );
 }
 
-export default Home
+export default Home;
