@@ -1,26 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import banner from '../assets/Images/banner.png';
 import { IoSearchOutline } from 'react-icons/io5';
 import IntroPost from './IntroPost'; // Import the IntroPost component
+import Footer from './Footer';
 
-
-
-function Search({BASE_URL}) {
+function Search({ BASE_URL }) {
 	const [searchInput, setSearchInput] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1);
 
 	const handleSearch = async () => {
 		try {
 			const response = await axios.get(`${BASE_URL}volumes?q=${searchInput}`);
 			setSearchResults(response.data.items);
+			setCurrentPage(1); // Reset to the first page
 		} catch (error) {
 			console.error('Error searching for books:', error);
 		}
 	};
 
+	// Calculate the total number of pages based on the search results and the number of items per page
+	const totalPages = Math.ceil(searchResults.length / 5);
+
+	// Get the current page's slice of search results
+	const getPageResults = () => {
+		const startIndex = (currentPage - 1) * 5;
+		const endIndex = startIndex + 5;
+		return searchResults.slice(startIndex, endIndex);
+	};
+
+	const handlePrevPage = () => {
+		setCurrentPage((prevPage) => prevPage - 1);
+	};
+
+	const handleNextPage = () => {
+		setCurrentPage((prevPage) => prevPage + 1);
+	};
+
 	return (
-		<div className="flex mt-8 justify-center flex-col px-4 md:px-8 lg:px-16">
+		<div className="flex flex-col items-center mt-8">
 			<img
 				src={banner}
 				alt="spicyBanner"
@@ -42,14 +61,30 @@ function Search({BASE_URL}) {
 			</div>
 
 			{/* Display search results using IntroPost component */}
-			{searchResults.map((book) => (
+			{getPageResults().map((book) => (
 				<IntroPost key={book.id} books={book} />
 			))}
+
+			{/* Pagination buttons */}
+			{totalPages > 1 && (
+				<div className="flex justify-center mt-4 mb-16">
+					{currentPage > 1 && (
+						<button onClick={handlePrevPage} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg">
+							Previous
+						</button>
+					)}
+					{currentPage < totalPages && (
+						<button onClick={handleNextPage} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg">
+							Next
+						</button>
+					)}
+				</div>
+			)}
+
+			{/* Footer */}
+			<Footer />
 		</div>
 	);
 }
-
-
-
 
 export default Search;

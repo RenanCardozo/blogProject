@@ -41,7 +41,7 @@ function Home() {
       <Header />
       <Search onSearch={handleSearch} BASE_URL={'https://www.googleapis.com/books/v1/'} />
       {books.length > 0 && <IntroPost books={books} />}
-      <Footer />
+
     </>
   );
 }
