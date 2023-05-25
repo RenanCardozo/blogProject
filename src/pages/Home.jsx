@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import IntroPost from '../components/IntroPost';
-import Footer from '../components/Footer';
 import GlobalApi from '../services/GlobalApi';
+import Footer from '../components/Footer';
 
 function Home() {
   const [books, setBooks] = useState([]);
@@ -17,9 +17,7 @@ function Home() {
       .then(response => {
         if (response.status === 200 && response.data) {
           const booksData = response.data.items; // Assuming the books are stored in the 'items' property
-
           setBooks(booksData);
-          console.log(booksData);
         }
       })
       .catch(error => {
@@ -27,11 +25,23 @@ function Home() {
       });
   };
 
+  const handleSearch = async (searchInput) => {
+    try {
+      const response = await GlobalApi.getBook(searchInput);
+      if (response) {
+        setBooks(response.items);
+      }
+    } catch (error) {
+      console.error('Error searching for books:', error);
+    }
+  };
+
   return (
     <>
       <Header />
-      <Search />
-      {books.length > 0 ? <IntroPost books={books[0]} /> : null}
+      <Search onSearch={handleSearch} BASE_URL={'https://www.googleapis.com/books/v1/'} />
+      {books.length > 0 && <IntroPost books={books} />}
+      <Footer />
     </>
   );
 }

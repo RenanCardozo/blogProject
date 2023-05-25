@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import banner from '../assets/Images/banner.png';
 import { IoSearchOutline } from 'react-icons/io5';
+import IntroPost from './IntroPost'; // Import the IntroPost component
 
-function Search() {
+
+
+function Search({BASE_URL}) {
+	const [searchInput, setSearchInput] = useState('');
+	const [searchResults, setSearchResults] = useState([]);
+
+	const handleSearch = async () => {
+		try {
+			const response = await axios.get(`${BASE_URL}volumes?q=${searchInput}`);
+			setSearchResults(response.data.items);
+		} catch (error) {
+			console.error('Error searching for books:', error);
+		}
+	};
+
 	return (
 		<div className="flex mt-8 justify-center flex-col px-4 md:px-8 lg:px-16">
 			<img
@@ -19,11 +35,20 @@ function Search() {
 					type="text"
 					placeholder="Search For Books"
 					className="flex-grow outline-none text-base"
+					value={searchInput}
+					onChange={(e) => setSearchInput(e.target.value)}
 				/>
+				<button onClick={handleSearch}>Search</button>
 			</div>
+
+			{/* Display search results using IntroPost component */}
+			{searchResults.map((book) => (
+				<IntroPost key={book.id} books={book} />
+			))}
 		</div>
 	);
 }
+
 
 
 
